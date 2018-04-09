@@ -9,6 +9,7 @@ Tested/Built with:
 + Vagrant 2.0.3
 + Packer 1.0.2
 + VirtualBox 5.2.8
++ Kali 2018.1 ISO
 
 Note: will probably work with lower versions but I have not tested.
 
