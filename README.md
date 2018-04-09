@@ -1,14 +1,14 @@
 # kali-autobuild
 
-This repo is my quick starting point for quickly getting up and running with latest Kali.
+This repo is my starting point for quickly getting up and running with latest Kali.
 
-Uses packer to securely download the Kali ISO and unattend install into a VM. Then pack that VM into a vagrant box.
-Modify the `scripts/bootstrap.sh` to add any tweaks to Kali to make it the way you like it.
+Uses packer to securely download the Kali ISO and preseed install into a VM. Then pack that VM into a vagrant box.
 
+# Dependancies
 Tested/Built with:
-Vagrant 2.0.3
-Packer 1.0.2
-VirtualBox 5.2.8
++ Vagrant 2.0.3
++ Packer 1.0.2
++ VirtualBox 5.2.8
 Note: will probably work with lower versions but I have not tested.
 
 # Get started
