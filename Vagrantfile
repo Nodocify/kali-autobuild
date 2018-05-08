@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-plugins = %w{ vagrant-triggers vagrant-vbguest }
+plugins = %w{ vagrant-vbguest }
 
 plugins.each do |plugin|
   unless Vagrant.has_plugin?(plugin)
