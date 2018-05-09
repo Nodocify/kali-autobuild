@@ -24,6 +24,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.name = 'kali-rolling'
     v.memory = ENV['VAGRANT_MEMORY'] || 4096
     v.cpus = ENV['VAGRANT_CPUS'] || 2
+    v.gui = true
+    v.customize ["modifyvm", :id, "--vram", "32"]
   end
 
   config.vbguest.auto_update = true
