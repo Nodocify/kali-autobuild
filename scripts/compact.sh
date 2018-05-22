@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-apt autoremove
+apt autoremove -y
 apt clean
 
 if [ -f /var/lib/dpkg/lock ]; then

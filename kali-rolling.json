@@ -1,57 +1,66 @@
 {
-  "builders": [{
-    "type": "virtualbox-iso",
-    "virtualbox_version_file": ".vbox_version",
-    "headless": false,
-
-    "guest_os_type": "Debian_64",
-    "disk_size": 30720,
-
-	"iso_url": "https://cdimage.kali.org/kali-2018.1/kali-linux-2018.1-amd64.iso",
-    "iso_checksum": "ed88466834ceeba65f426235ec191fb3580f71d50364ac5131daec1bf976b317",
-    "iso_checksum_type": "sha256",
-
-    "boot_command": [
-      "<esc><wait>",
-      "install ",
-	  "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kali-linux-rolling-preseed.cfg ",
-      "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
-      "netcfg/get_hostname=jupiter ",
-	  "netcfg/get_domain= ",
-      "fb=false debconf/frontend=noninteractive ",
-      "console-setup/ask_detect=false ",
-	  "console-keymaps-at/keymap=us ",
-	  "keyboard-configuration/xkb-keymap=us ",
-	  "<enter><wait10><wait10><wait10>",
-	  "<enter><wait>"
+    "builders": [
+        {
+            "boot_command": [
+                "<esc><wait>",
+                "install ",
+                "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kali-linux-rolling-preseed.cfg ",
+                "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+                "netcfg/get_hostname=jupiter ",
+                "netcfg/get_domain= ",
+                "fb=false debconf/frontend=noninteractive ",
+                "console-setup/ask_detect=false ",
+                "console-keymaps-at/keymap=us ",
+                "keyboard-configuration/xkb-keymap=us ",
+                "<enter><wait10><wait10><wait10>",
+                "<enter><wait>"
+            ],
+            "boot_wait": "10s",
+            "disk_size": 25600,
+            "guest_os_type": "Debian_64",
+            "headless": true,
+            "http_directory": "http",
+            "iso_checksum": "56f677e2edfb2efcd0b08662ddde824e254c3d53567ebbbcdbbf5c03efd9bc0f",
+            "iso_checksum_type": "sha256",
+            "iso_url": "https://cdimage.kali.org/current/kali-linux-2018.2-amd64.iso",
+            "shutdown_command": "echo 'vagrant'|sudo -S /sbin/shutdown -h now",
+            "ssh_password": "vagrant",
+            "ssh_port": 22,
+            "ssh_username": "vagrant",
+            "ssh_wait_timeout": "10000s",
+            "type": "virtualbox-iso",
+            "vboxmanage": [
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--memory",
+                    "2048"
+                ],
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--cpus",
+                    "2"
+                ]
+            ],
+            "virtualbox_version_file": ".vbox_version"
+        }
     ],
-    "boot_wait": "10s",
-
-    "http_directory": "http",
-
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
-    "ssh_port": 22,
-    "ssh_wait_timeout": "10000s",
-
-    "vboxmanage": [
-      ["modifyvm", "{{.Name}}", "--memory", "4096"],
-      ["modifyvm", "{{.Name}}", "--cpus", "2"]
+    "post-processors": [
+        {
+            "output": "build/kali-rolling.box",
+            "type": "vagrant"
+        }
     ],
-
-    "shutdown_command": "echo 'vagrant'|sudo -S /sbin/shutdown -h now"
-  }],
-  "post-processors": [{
-    "output": "build/kali-rolling.box",
-    "type": "vagrant"
-  }],
-  "provisioners": [{
-    "type": "shell",
-    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-    "scripts": [
-      "scripts/vagrant.sh",
-	  "scripts/vboxguest.sh",
-      "scripts/compact.sh"
+    "provisioners": [
+        {
+            "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+            "scripts": [
+                "scripts/vagrant.sh",
+                "scripts/vboxguest.sh",
+                "scripts/compact.sh"
+            ],
+            "type": "shell"
+        }
     ]
-  }]
 }
