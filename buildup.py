@@ -36,16 +36,19 @@ for hash in hashes:
         break
 latest_iso_url = CURRENT_URL + version_name
 
-print("[ buildup ] Updating config file...")
+print("[ buildup ] Checking config file.")
 file_name = "kali-rolling.json"
 with open(file_name) as f:
     packer_config = json.load(f)
 
-packer_config["builders"][0]["iso_url"] = latest_iso_url
-packer_config["builders"][0]["iso_checksum"] = latest_hash
-packer_config["builders"][0]["disk_size"] = vm_disk_size
+if packer_config["builders"][0]["iso_url"] != latest_iso_url:
+    print("[ buildup ] New iso version found.")
+    packer_config["builders"][0]["iso_url"] = latest_iso_url
+    packer_config["builders"][0]["iso_checksum"] = latest_hash
+    packer_config["builders"][0]["disk_size"] = vm_disk_size
+    packer_config["post-processors"][0]["output"] = "build/kali-%s.box" % latest_version
+
 packer_config["builders"][0]["vboxmanage"] = [['modifyvm', '{{.Name}}', '--memory', vm_memory], ['modifyvm', '{{.Name}}', '--cpus', vm_cpus]]
-packer_config["post-processors"][0]["output"] = "build/kali-%s.box" % latest_version
 
 with open(file_name, "w") as f:
     f.write(json.dumps(packer_config, indent=4, sort_keys=True))
@@ -55,6 +58,13 @@ os.system("packer build %s" % file_name)
 
 print("[ buildup ] Import vagrant box.")
 os.system("vagrant box add kali-autobuild build/kali-%s.box" % latest_version)
+
+if not keep_caches:
+    print("[ buildup ] Build complete. Clearing caches.")
+    os.system("rm -f packer_cache/*")
+    os.system("rm -f build/*")
+else:
+    print("[ buildup ] Build complete.")
 
 print("[ buildup ] Starting vagrant box.")
 os.system("vagrant up")
