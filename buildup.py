@@ -10,13 +10,13 @@ import json
 import os
 import time
 
-def hms_string(sec_elapsed):
+def hmsString(sec_elapsed):
     h = int(sec_elapsed / (60 * 60))
     m = int((sec_elapsed % (60 * 60)) / 60)
     s = sec_elapsed % 60.
     return "{}:{:>02}:{:>05.2f}".format(h, m, s)
 
-def exit_on_error(return_code):
+def exitOnError(return_code):
     if return_code != 0:
         sys.exit(1)
 
@@ -65,23 +65,23 @@ with open(file_name, "w") as f:
 
 print("[ buildup ] Starting VM build.")
 return_code = os.system("packer build %s" % file_name)
-exit_on_error(return_code)
+exitOnError(return_code)
 
 print("[ buildup ] Importing vagrant box.")
 return_code = os.system("vagrant box add kali-autobuild build/kali-%s.box" % latest_version)
-exit_on_error(return_code)
+exitOnError(return_code)
 
 
 end_time = time.time()
-print("[ buildup ] Build complete. Duration: {}".format(hms_string(end - start)))
+print("[ buildup ] Build complete. Duration: {}".format(hmsString(end - start)))
 
 if not keep_caches:
     print("[ buildup ] Clearing caches.")
     return_code = os.system("rm -f packer_cache/*")
-    exit_on_error(return_code)
+    exitOnError(return_code)
     return_code = os.system("rm -f build/*")
-    exit_on_error(return_code)
+    exitOnError(return_code)
 
 print("[ buildup ] Starting vagrant box.")
 return_code = os.system("vagrant up")
-exit_on_error(return_code)
+exitOnError(return_code)
