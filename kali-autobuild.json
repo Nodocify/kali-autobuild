@@ -48,7 +48,7 @@
     ],
     "post-processors": [
         {
-            "output": "build/kali-rolling.box",
+            "output": "build/kali-2018.2.box",
             "type": "vagrant"
         }
     ],

@@ -21,7 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "kali-autobuild"
 
   config.vm.provider "virtualbox" do |v, override|
-    v.name = 'kali-rolling'
+    v.name = 'kali-autobuild'
     v.memory = ENV['VAGRANT_MEMORY'] || 4096
     v.cpus = ENV['VAGRANT_CPUS'] || 2
     v.gui = true
