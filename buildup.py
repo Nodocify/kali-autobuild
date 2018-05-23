@@ -16,6 +16,10 @@ def hms_string(sec_elapsed):
     s = sec_elapsed % 60.
     return "{}:{:>02}:{:>05.2f}".format(h, m, s)
 
+def exit_on_error(return_code):
+    if return_code != 0:
+        sys.exit(1)
+
 start_time = time.time()
 print("[ buildup ] Reading config file.")
 config = configparser.ConfigParser()
@@ -37,6 +41,7 @@ print("[ buildup ] Getting latest image information.")
 r = requests.get(CURRENT_URL + "SHA256SUMS")
 hashes = r.text.split('\n')
 latest_version = hashes[0].split()[1].split('-')[2]
+print("[ buildup ] Latest version found: {}".format(latest_version))
 version_name = "{}-{}-{}.iso".format(image_ver, latest_version, architecture)
 for hash in hashes:
     if version_name in hash:
@@ -49,31 +54,34 @@ file_name = "kali-rolling.json"
 with open(file_name) as f:
     packer_config = json.load(f)
 
-if packer_config["builders"][0]["iso_url"] != latest_iso_url:
-    print("[ buildup ] New iso version found.")
-    packer_config["builders"][0]["iso_url"] = latest_iso_url
-    packer_config["builders"][0]["iso_checksum"] = latest_hash
-    packer_config["builders"][0]["disk_size"] = vm_disk_size
-    packer_config["post-processors"][0]["output"] = "build/kali-%s.box" % latest_version
-
+packer_config["builders"][0]["iso_url"] = latest_iso_url
+packer_config["builders"][0]["iso_checksum"] = latest_hash
+packer_config["builders"][0]["disk_size"] = vm_disk_size
+packer_config["post-processors"][0]["output"] = "build/kali-%s.box" % latest_version
 packer_config["builders"][0]["vboxmanage"] = [['modifyvm', '{{.Name}}', '--memory', vm_memory], ['modifyvm', '{{.Name}}', '--cpus', vm_cpus]]
 
 with open(file_name, "w") as f:
     f.write(json.dumps(packer_config, indent=4, sort_keys=True))
 
 print("[ buildup ] Starting VM build.")
-os.system("packer build %s" % file_name)
+return_code = os.system("packer build %s" % file_name)
+exit_on_error(return_code)
 
-print("[ buildup ] Import vagrant box.")
-os.system("vagrant box add kali-autobuild build/kali-%s.box" % latest_version)
+print("[ buildup ] Importing vagrant box.")
+return_code = os.system("vagrant box add kali-autobuild build/kali-%s.box" % latest_version)
+exit_on_error(return_code)
+
 
 end_time = time.time()
 print("[ buildup ] Build complete. Duration: {}".format(hms_string(end - start)))
 
 if not keep_caches:
     print("[ buildup ] Clearing caches.")
-    os.system("rm -f packer_cache/*")
-    os.system("rm -f build/*")
+    return_code = os.system("rm -f packer_cache/*")
+    exit_on_error(return_code)
+    return_code = os.system("rm -f build/*")
+    exit_on_error(return_code)
 
 print("[ buildup ] Starting vagrant box.")
-os.system("vagrant up")
+return_code = os.system("vagrant up")
+exit_on_error(return_code)
