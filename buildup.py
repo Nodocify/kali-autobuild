@@ -8,7 +8,15 @@ import requests
 import configparser
 import json
 import os
+import time
 
+def hms_string(sec_elapsed):
+    h = int(sec_elapsed / (60 * 60))
+    m = int((sec_elapsed % (60 * 60)) / 60)
+    s = sec_elapsed % 60.
+    return "{}:{:>02}:{:>05.2f}".format(h, m, s)
+
+start_time = time.time()
 print("[ buildup ] Reading config file.")
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -59,12 +67,13 @@ os.system("packer build %s" % file_name)
 print("[ buildup ] Import vagrant box.")
 os.system("vagrant box add kali-autobuild build/kali-%s.box" % latest_version)
 
+end_time = time.time()
+print("[ buildup ] Build complete. Duration: {}".format(hms_string(end - start)))
+
 if not keep_caches:
-    print("[ buildup ] Build complete. Clearing caches.")
+    print("[ buildup ] Clearing caches.")
     os.system("rm -f packer_cache/*")
     os.system("rm -f build/*")
-else:
-    print("[ buildup ] Build complete.")
 
 print("[ buildup ] Starting vagrant box.")
 os.system("vagrant up")
