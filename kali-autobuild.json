@@ -17,7 +17,6 @@
             ],
             "boot_wait": "10s",
             "disk_size": 25600,
-            "guest_additions_mode": "disable",
             "guest_os_type": "Debian_64",
             "headless": true,
             "http_directory": "http",
