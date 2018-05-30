@@ -49,7 +49,7 @@ def updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_
     packer_config["builders"][0]["iso_checksum"] = latest_hash
     packer_config["builders"][0]["disk_size"] = vm_disk_size
     packer_config["builders"][0]["vboxmanage"] = [['modifyvm', '{{.Name}}', '--memory', vm_memory], ['modifyvm', '{{.Name}}', '--cpus', vm_cpus]]
-    packer_config["post-processors"][0]["output"] = "build/kali-%s.box" % latest_version
+    packer_config["post-processors"][0]["output"] = "build/kali-{}.box".format(latest_version)
 
     with open(file_name, "w") as f:
         f.write(json.dumps(packer_config, indent=4, sort_keys=True))
@@ -58,10 +58,10 @@ def updateVagrantfile(file_name, latest_version):
     r = re.compile(r"(\s*config.vm.box\s=\s)'.*'")
     with fileinput.FileInput(file_name, inplace=True, backup='.old') as file:
         for line in file:
-            print(r.sub(r"\g<1>'kali-%s'" % latest_version, line), end='')
+            print(r.sub(r"\g<1>'kali-{}'".format(latest_version), line), end='')
 
 def runPacker(file_name):
-    return_code = os.system("packer build %s" % file_name)
+    return_code = os.system("packer build {}".format(file_name))
     exitOnError(return_code)
 
 def importVagrantBox(latest_version):
