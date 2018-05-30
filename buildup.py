@@ -84,10 +84,6 @@ def removeCaches():
     return_code = os.system("rm -f build/*")
     exitOnError(return_code)
 
-def vagrantUp():
-    return_code = os.system("vagrant up")
-    exitOnError(return_code)
-
 if __name__ == "__main__":
     import requests
     import configparser
@@ -127,6 +123,3 @@ if __name__ == "__main__":
     if not keep_caches:
         print("[ buildup ] Clearing caches.")
         removeCaches()
-    sys.exit()
-    print("[ buildup ] Starting vagrant box.")
-    vagrantUp()
