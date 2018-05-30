@@ -74,7 +74,6 @@ def importVagrantBox(latest_version):
     exitOnError(return_code)
 
 def removeCaches():
-    print("[ buildup ] Clearing caches.")
     return_code = os.system("rm -f packer_cache/*")
     exitOnError(return_code)
     return_code = os.system("rm -f build/*")
@@ -118,6 +117,7 @@ if __name__ == "__main__":
     print("[ buildup ] Build complete. Duration: {}".format(hmsString(end - start)))
 
     if not keep_caches:
+        print("[ buildup ] Clearing caches.")
         removeCaches()
 
     print("[ buildup ] Starting vagrant box.")
