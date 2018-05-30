@@ -54,12 +54,18 @@ def updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_
     with open(file_name, "w") as f:
         f.write(json.dumps(packer_config, indent=4, sort_keys=True))
 
+def updateVagrantfile(file_name, latest_version):
+    r = re.compile(r"(\s*config.vm.box\s=\s)'.*'")
+    with fileinput.FileInput(file_name, inplace=True, backup='.old') as file:
+        for line in file:
+            print(r.sub(r"\g<1>'kali-%s'" % latest_version, line), end='')
+
 def runPacker(file_name):
     return_code = os.system("packer build %s" % file_name)
     exitOnError(return_code)
 
 def importVagrantBox(latest_version):
-    return_code = os.system("vagrant box add kali-autobuild build/kali-%s.box" % latest_version)
+    return_code = os.system("vagrant box add kali-{0} build/kali-{0}.box".format(latest_version))
     exitOnError(return_code)
 
 def removeCaches():
@@ -79,6 +85,8 @@ if __name__ == "__main__":
     import json
     import os
     import time
+    import fileinput
+    import re
 
     URL = "https://cdimage.kali.org/current/"
     start = time.time()
@@ -91,6 +99,9 @@ if __name__ == "__main__":
     print("[ buildup ] Checking packer config file.")
     file_name = "kali-autobuild.json"
     updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_memory, vm_cpus, latest_version)
+
+    print("[ buildup ] Updating Vagrantfile.")
+    updateVagrantfile("Vagrantfile", latest_version)
 
     print("[ buildup ] Starting VM build.")
     runPacker(file_name)
