@@ -54,11 +54,16 @@ def updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_
     with open(file_name, "w") as f:
         f.write(json.dumps(packer_config, indent=4, sort_keys=True))
 
-def updateVagrantfile(file_name, latest_version):
-    r = re.compile(r"(\s*config.vm.box\s=\s)'.*'")
-    with fileinput.FileInput(file_name, inplace=True, backup='.old') as file:
-        for line in file:
-            print(r.sub(r"\g<1>'kali-{}'".format(latest_version), line), end='')
+def updateVagrantfile(file_name, latest_version, vm_memory, vm_cpus):
+    updates = [(re.compile(r"(\s*config.vm.box\s=\s)'.*'"), r"\g<1>'kali-{}'".format(latest_version)),
+               (re.compile(r"(\s*v.memory\s=\sENV\['VAGRANT_MEMORY'\]\s\|\|\s)\d*"), r"\g<1>{}".format(vm_memory)),
+               (re.compile(r"(\s*v.cpus\s=\sENV\['VAGRANT_CPUS'\]\s\|\|\s)\d*"), r"\g<1>{}".format(vm_cpus)),
+               (re.compile(r"(\s*v.name\s=\s)'.*'"), r"\g<1>'kali-{}'".format(latest_version))]
+
+    for update in updates:
+        with fileinput.FileInput(file_name, inplace=True) as file:
+            for line in file:
+                print(update[0].sub(update[1], line), end='')
 
 def runPacker(file_name):
     return_code = os.system("packer build {}".format(file_name))
@@ -101,7 +106,7 @@ if __name__ == "__main__":
     updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_memory, vm_cpus, latest_version)
 
     print("[ buildup ] Updating Vagrantfile.")
-    updateVagrantfile("Vagrantfile", latest_version)
+    updateVagrantfile("Vagrantfile", latest_version, vm_memory, vm_cpus)
 
     print("[ buildup ] Starting VM build.")
     runPacker(file_name)
