@@ -69,6 +69,11 @@ def runPacker(file_name):
     return_code = os.system("packer build {}".format(file_name))
     exitOnError(return_code)
 
+def removeOldBoxes():
+    return_code = os.system("vagrant box list | grep ^kali- | cut -f 1 -d ' ' | xargs -L 1 vagrant box remove 2>/dev/null")
+    if return_code != 0:
+        print("No boxes to remove.")
+
 def importVagrantBox(latest_version):
     return_code = os.system("vagrant box add kali-{0} build/kali-{0}.box".format(latest_version))
     exitOnError(return_code)
@@ -110,6 +115,9 @@ if __name__ == "__main__":
     print("[ buildup ] Starting VM build.")
     runPacker(file_name)
 
+    print("[ buildup ] Removing old boxes.")
+    removeOldBoxes()
+
     print("[ buildup ] Importing vagrant box.")
     importVagrantBox(latest_version)
 
@@ -119,6 +127,6 @@ if __name__ == "__main__":
     if not keep_caches:
         print("[ buildup ] Clearing caches.")
         removeCaches()
-
+    sys.exit()
     print("[ buildup ] Starting vagrant box.")
     vagrantUp()
