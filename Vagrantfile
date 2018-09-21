@@ -19,6 +19,8 @@ VAGRANTFILE_API_VERSION = '2'
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = 'kali-autobuild'
+  config.vm.define 'kali-autobuild' do |t|
+    end
 
   config.vm.provider 'virtualbox' do |v, override|
     v.name = 'kali-autobuild'
