@@ -132,3 +132,15 @@ if __name__ == "__main__":
     if not keep_caches:
         print("[ buildup ] Clearing caches.")
         removeCaches()
+
+    print("[ buildup ] Launching VM to verify tools install.")
+    os.system("vagrant up --no-provision")
+    print("[ buildup ] Disregard above errors. Safe to ignore.")
+
+    print("[ buildup ] Installing tools.")
+    os.system("vagrant vbguest --do install")
+
+    print("[ buildup ] Tools installed. Halting VM.")
+    os.system("vagrant halt")
+
+    print("[ buildup ] VM ready. Type 'vagrant up' to launch and provision.")
