@@ -118,7 +118,7 @@ if __name__ == "__main__":
     updateVagrantfile(vagrant_template, vagrant_file, latest_version, vm_memory, vm_cpus)
 
     print("[ buildup ] Starting VM build.")
-    runPacker(file_name)
+    runPacker(packer_file)
 
     print("[ buildup ] Removing old boxes.")
     removeOldBoxes()
