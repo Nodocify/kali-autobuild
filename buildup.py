@@ -116,7 +116,6 @@ if __name__ == "__main__":
     vagrant_template = "Vagrantfile.template"
     vagrant_file =  "Vagrantfile"
     updateVagrantfile(vagrant_template, vagrant_file, latest_version, vm_memory, vm_cpus)
-    input()
 
     print("[ buildup ] Starting VM build.")
     runPacker(file_name)
