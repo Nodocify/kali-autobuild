@@ -1,0 +1,6 @@
+build/
+packer_cache/
+.vagrant/
+todo.md
+Vagrantfile
+kali-autobuild.json

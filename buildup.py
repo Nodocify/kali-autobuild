@@ -41,8 +41,8 @@ def checkLatestImage(URL, image_ver, architecture):
     latest_iso_url = URL + version_name
     return latest_iso_url, latest_version, version_name, latest_hash
 
-def updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_memory, vm_cpus, latest_version):
-    with open(file_name) as f:
+def updatePackerConfig(packer_template, packer_file, latest_iso_url, latest_hash, vm_disk_size, vm_memory, vm_cpus, latest_version):
+    with open(packer_template) as f:
         packer_config = json.load(f)
 
     packer_config["builders"][0]["iso_url"] = latest_iso_url
@@ -51,18 +51,24 @@ def updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_
     packer_config["builders"][0]["vboxmanage"] = [['modifyvm', '{{.Name}}', '--memory', vm_memory], ['modifyvm', '{{.Name}}', '--cpus', vm_cpus]]
     packer_config["post-processors"][0]["output"] = "build/kali-{}.box".format(latest_version)
 
-    with open(file_name, "w") as f:
+    with open(packer_file, "w") as f:
         f.write(json.dumps(packer_config, indent=4, sort_keys=True))
 
-def updateVagrantfile(file_name, latest_version, vm_memory, vm_cpus):
+def updateVagrantfile(vagrant_template, vagrant_file, latest_version, vm_memory, vm_cpus):
     updates = [(re.compile(r"(\s*config.vm.box\s=\s)'.*'"), r"\g<1>'kali-{}'".format(latest_version)),
+               (re.compile(r"(\s*config.vm.define\s).*"), r"\g<1>'kali-{}' do |t|".format(latest_version)),
                (re.compile(r"(\s*v.memory\s=\sENV\['VAGRANT_MEMORY'\]\s\|\|\s)\d*"), r"\g<1>{}".format(vm_memory)),
                (re.compile(r"(\s*v.cpus\s=\sENV\['VAGRANT_CPUS'\]\s\|\|\s)\d*"), r"\g<1>{}".format(vm_cpus)),
                (re.compile(r"(\s*v.name\s=\s)'.*'"), r"\g<1>'kali-{}'".format(latest_version))]
 
+    with open(vagrant_template, 'r') as t:
+        with open(vagrant_file, 'w') as f:
+            for line in t:
+                f.write(line)
+
     for update in updates:
-        with fileinput.FileInput(file_name, inplace=True) as file:
-            for line in file:
+        with fileinput.FileInput(vagrant_file, inplace=True) as f:
+            for line in f:
                 print(update[0].sub(update[1], line), end='')
 
 def runPacker(file_name):
@@ -102,11 +108,15 @@ if __name__ == "__main__":
     latest_iso_url, latest_version, version_name, latest_hash = checkLatestImage(URL, image_ver, architecture)
 
     print("[ buildup ] Checking packer config file.")
-    file_name = "kali-autobuild.json"
-    updatePackerConfig(file_name, latest_iso_url, latest_hash, vm_disk_size, vm_memory, vm_cpus, latest_version)
+    packer_template = "kali-autobuild.template"
+    packer_file = "kali-autobuild.json"
+    updatePackerConfig(packer_template, packer_file, latest_iso_url, latest_hash, vm_disk_size, vm_memory, vm_cpus, latest_version)
 
     print("[ buildup ] Updating Vagrantfile.")
-    updateVagrantfile("Vagrantfile", latest_version, vm_memory, vm_cpus)
+    vagrant_template = "Vagrantfile.template"
+    vagrant_file =  "Vagrantfile"
+    updateVagrantfile(vagrant_template, vagrant_file, latest_version, vm_memory, vm_cpus)
+    input()
 
     print("[ buildup ] Starting VM build.")
     runPacker(file_name)
